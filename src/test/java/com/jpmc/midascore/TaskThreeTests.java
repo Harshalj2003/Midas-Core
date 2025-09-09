@@ -1,10 +1,14 @@
 package com.jpmc.midascore;
 
+import com.jpmc.midascore.kafka.KafkaProducer;
+import com.jpmc.midascore.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.event.EventListener;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -23,24 +27,53 @@ public class TaskThreeTests {
     @Autowired
     private FileLoader fileLoader;
 
-    @Test
-    void task_three_verifier() throws InterruptedException {
-        userPopulator.populate();
-        String[] transactionLines = fileLoader.loadStrings("/test_data/mnbvcxz.vbnm");
-        for (String transactionLine : transactionLines) {
-            kafkaProducer.send(transactionLine);
-        }
-        Thread.sleep(2000);
+    @Autowired
+    private UserRepository userRepository;
 
 
-        logger.info("----------------------------------------------------------");
-        logger.info("----------------------------------------------------------");
-        logger.info("----------------------------------------------------------");
-        logger.info("use your debugger to find out what waldorf's balance is after all transactions are processed");
-        logger.info("kill this test once you find the answer");
-        while (true) {
-            Thread.sleep(20000);
-            logger.info("...");
-        }
+
+    //    @Test
+//    void task_three_verifier() throws InterruptedException {
+//        userPopulator.populate();
+//        String[] transactionLines = fileLoader.loadStrings("/test_data/mnbvcxz.vbnm");
+//        for (String transactionLine : transactionLines) {
+//            kafkaProducer.send(transactionLine);
+//        }
+//        Thread.sleep(2000);
+//
+//
+//        logger.info("----------------------------------------------------------");
+//        logger.info("----------------------------------------------------------");
+//        logger.info("----------------------------------------------------------");
+//        logger.info("use your debugger to find out what waldorf's balance is after all transactions are processed");
+//        logger.info("kill this test once you find the answer");
+//        while (true) {
+//            Thread.sleep(20000);
+//            logger.info("...");
+//        }
+//    }
+@Test
+void task_three_verifier() throws InterruptedException {
+    userPopulator.populate();
+    String[] transactionLines = fileLoader.loadStrings("/test_data/mnbvcxz.vbnm");
+    for (String transactionLine : transactionLines) {
+        kafkaProducer.send(transactionLine);
     }
+    Thread.sleep(2000);
+
+    // 👇 Add this right here:
+    System.out.println("==== FINAL USER BALANCES ====");
+    userRepository.findAll().forEach(user ->
+            System.out.println(user.getName() + " -> " + user.getBalance()));
+
+    logger.info("----------------------------------------------------------");
+    logger.info("use your debugger to find out what waldorf's balance is after all transactions are processed");
+    logger.info("kill this test once you find the answer");
+
+    while (true) {
+        Thread.sleep(20000);
+        logger.info("...");
+    }
+}
+
 }

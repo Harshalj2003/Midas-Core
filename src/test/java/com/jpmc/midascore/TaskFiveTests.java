@@ -1,6 +1,7 @@
 package com.jpmc.midascore;
 
 import com.jpmc.midascore.foundation.Balance;
+import com.jpmc.midascore.kafka.KafkaProducer;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext
+@DirtiesContext //remove or Disable this annotation to skip process killing and avoiding data reset from H2 DB..,
 @EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
 public class TaskFiveTests {
     static final Logger logger = LoggerFactory.getLogger(TaskFiveTests.class);
@@ -48,5 +49,6 @@ public class TaskFiveTests {
         }
         output.append("---end output ---");
         logger.info(output.toString());
+        Thread.sleep(999999); //sleep the process to verify transactions data into H2 DB
     }
 }
